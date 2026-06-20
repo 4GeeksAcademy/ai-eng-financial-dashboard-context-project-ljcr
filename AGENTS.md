@@ -9,7 +9,10 @@ Agents working on this project **must**:
   `./.agents/skills`
 
 - Look for the **project memory bank** in:  
-  `./memory-bank`  
+  `./.agents/memory-bank`  
   _(if the directory exists)_
+
+- Look for the **project's summary** in the file:
+  `./.agents/resumen_inicial.md`
 
 Before taking action (analyzing code, modifying files, or generating outputs), always review the latest files in these locations to ensure compliance with project conventions, context, and operational constraints.
