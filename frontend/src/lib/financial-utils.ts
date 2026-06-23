@@ -66,15 +66,46 @@ export function computeMonthlyData(
     });
 }
 
-export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("en-US", {
+export function formatCurrency(
+  value: number,
+  currency = "USD",
+  locale = "en-US",
+  options: Intl.NumberFormatOptions = {},
+): string {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: "USD",
+    currency,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
+    ...options,
   }).format(value);
 }
 
-export function formatPercent(value: number): string {
-  return `${value.toFixed(1)}%`;
+export function formatPercent(
+  value: number,
+  locale = "en-US",
+  options: Intl.NumberFormatOptions = {},
+): string {
+  return new Intl.NumberFormat(locale, {
+    style: "percent",
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+    ...options,
+  }).format(value / 100);
+}
+
+export function formatCompactCurrency(
+  value: number,
+  currency = "USD",
+  locale = "en-US",
+  options: Intl.NumberFormatOptions = {},
+): string {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    notation: "compact",
+    compactDisplay: "short",
+    maximumFractionDigits: 0,
+    ...options,
+  }).format(value);
 }

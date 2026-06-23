@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   computeKPIs,
   computeMonthlyData,
+  formatCompactCurrency,
   formatCurrency,
   formatPercent,
 } from "./financial-utils";
@@ -105,10 +106,14 @@ describe("computeMonthlyData", () => {
 
 describe("formatters", () => {
   it("formats currency without decimals", () => {
-    expect(formatCurrency(1234.56)).toBe("$1,235");
+    expect(formatCurrency(1234.56, "USD", "en-US")).toBe("$1,235");
   });
 
   it("formats percent with one decimal", () => {
     expect(formatPercent(15.555)).toBe("15.6%");
+  });
+
+  it("formats compact currency for chart axes", () => {
+    expect(formatCompactCurrency(12000, "USD", "en-US")).toBe("$12K");
   });
 });

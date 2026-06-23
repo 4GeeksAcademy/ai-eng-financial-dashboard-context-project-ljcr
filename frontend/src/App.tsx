@@ -12,12 +12,12 @@ import { computeKPIs, computeMonthlyData } from "@/lib/financial-utils";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 
-async function fetchFinancialData(): Promise<FinancialMovement[]> {
-  const response = await fetch(`${API_BASE_URL}/api/metrics`);
+async function fetchFinancialData(signal?: AbortSignal): Promise<FinancialMovement[]> {
+  const response = await fetch(`${API_BASE_URL}/api/metrics`, { signal });
   if (!response.ok) {
     throw new Error(`Failed to fetch financial data: ${response.status}`);
   }
-  return response.json();
+  return (await response.json()) as FinancialMovement[];
 }
 
 function App() {
@@ -27,39 +27,56 @@ function App() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchFinancialData()
+    const abortController = new AbortController();
+
+    fetchFinancialData(abortController.signal)
       .then((movements) => {
         setMetrics(computeKPIs(movements));
         setMonthlyData(computeMonthlyData(movements));
       })
-      .catch(() => {
+      .catch((err: unknown) => {
+        if (err instanceof DOMException && err.name === "AbortError") {
+          return;
+        }
+
         setError(
           "No se pudo cargar la informacion financiera. Revisa la API de backend.",
         );
       })
       .finally(() => {
-        setLoading(false);
+        if (!abortController.signal.aborted) {
+          setLoading(false);
+        }
       });
+
+    return () => {
+      abortController.abort();
+    };
   }, []);
 
   return (
-    <main className="dark min-h-screen bg-background text-foreground">
+    <main className="dark min-h-screen bg-background text-foreground" aria-busy={loading}>
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-8">
           <DashboardHeader period="2024 - Full Year" />
 
           {error ? (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive-foreground">
+            <div
+              className="rounded-lg border border-destructive/50 bg-destructive/15 p-4 text-sm text-destructive-foreground"
+              role="alert"
+              aria-live="assertive"
+            >
               {error}
             </div>
           ) : null}
 
-          <section aria-label="Key performance indicators">
+          <section aria-label="Key performance indicators" role="region">
             <KPIRow metrics={metrics} loading={loading} />
           </section>
 
           <section
             aria-label="Financial charts"
+            role="region"
             className="grid grid-cols-1 gap-4 xl:grid-cols-2"
           >
             <IncomeOutcomeChart data={monthlyData} loading={loading} />

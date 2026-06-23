@@ -1,0 +1,1 @@
+Se aplicó la skill `typescript-react-reviewer` para reforzar la calidad del dashboard en React 19, priorizando anti-patrones críticos de hooks (cleanup/cancelación en `useEffect`) y seguridad de tipos en flujos asíncronos, porque en un dashboard financiero la estabilidad y mantenibilidad del estado son claves para evitar errores silenciosos en producción.

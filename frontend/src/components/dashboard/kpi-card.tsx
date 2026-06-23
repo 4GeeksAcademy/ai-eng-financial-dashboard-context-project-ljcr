@@ -6,6 +6,7 @@ import { type LucideIcon } from 'lucide-react'
 interface KPICardProps {
   label: string
   value: string
+  numericValue?: number
   helperText: string
   icon: LucideIcon
   variant: 'income' | 'outcome' | 'profit' | 'profitPercent'
@@ -31,12 +32,18 @@ const variantStyles: Record<KPICardProps['variant'], { badge: string; icon: stri
   },
 }
 
-export function KPICard({ label, value, helperText, icon: Icon, variant, loading }: KPICardProps) {
+export function KPICard({ label, value, numericValue, helperText, icon: Icon, variant, loading }: KPICardProps) {
   const styles = variantStyles[variant]
+  const isSemanticMetric = variant === 'profit' || variant === 'profitPercent'
+  const valueColorClass = isSemanticMetric
+    ? numericValue != null && numericValue < 0
+      ? 'text-[var(--outcome-badge-fg)]'
+      : 'text-[var(--income-badge-fg)]'
+    : 'text-foreground'
 
   if (loading) {
     return (
-      <Card className="border-border/60">
+      <Card className="border-border/60" role="status" aria-label={`Loading ${label} metric`} aria-busy="true">
         <CardContent className="p-6 flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <Skeleton className="h-4 w-28" />
@@ -50,18 +57,18 @@ export function KPICard({ label, value, helperText, icon: Icon, variant, loading
   }
 
   return (
-    <Card className="border-border/60 hover:border-border transition-colors">
+    <Card className="border-border/60 hover:border-border transition-colors" role="article" aria-label={`${label}: ${value}`}>
       <CardContent className="p-6 flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <span className="text-sm font-medium text-muted-foreground tracking-wide uppercase text-pretty">
+          <span className="text-sm font-medium text-foreground/85 tracking-wide uppercase text-pretty">
             {label}
           </span>
-          <span className={cn('p-1.5 rounded-lg', styles.badge)}>
-            <Icon size={16} className={styles.icon} />
+          <span className={cn('p-1.5 rounded-lg', styles.badge)} aria-hidden="true">
+            <Icon size={16} className={styles.icon} aria-hidden="true" focusable="false" />
           </span>
         </div>
-        <p className="text-3xl font-semibold tracking-tight text-foreground">{value}</p>
-        <p className="text-xs text-muted-foreground leading-relaxed">{helperText}</p>
+        <p className={`text-3xl font-semibold tracking-tight tabular-nums ${valueColorClass}`}>{value}</p>
+        <p className="text-xs text-foreground/80 leading-relaxed">{helperText}</p>
       </CardContent>
     </Card>
   )
